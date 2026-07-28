@@ -77,24 +77,27 @@ The container restarts automatically on crash or VPS reboot
 
 ## 5. Configure nginx
 
-Copy the example config and edit the domain:
+The example config is already set up for `eiceblog.eicetechnology.com`:
 
 ```bash
 sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/cms-admin
-sudo nano /etc/nginx/sites-available/cms-admin   # set server_name
 sudo ln -s /etc/nginx/sites-available/cms-admin /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-At this point the site is live over plain HTTP. Confirm `http://your-domain`
-loads the login page before moving to HTTPS.
+Before this works, point the domain's DNS `A` record at this VPS's IP if you
+haven't already.
+
+At this point the site is live over plain HTTP. Confirm
+`http://eiceblog.eicetechnology.com` loads the login page before moving to
+HTTPS.
 
 ## 6. Enable HTTPS
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d admin.example.com
+sudo certbot --nginx -d eiceblog.eicetechnology.com
 ```
 
 Certbot edits the nginx config to add the `443` block and HTTP→HTTPS redirect,

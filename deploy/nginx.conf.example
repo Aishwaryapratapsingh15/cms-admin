@@ -1,14 +1,14 @@
-# Example nginx reverse proxy config for cms-admin.
-# Copy to /etc/nginx/sites-available/cms-admin, adjust server_name,
+# nginx reverse proxy config for cms-admin.
+# Copy to /etc/nginx/sites-available/cms-admin,
 # then symlink into sites-enabled and reload nginx. See DEPLOYMENT.md.
 
 server {
     listen 80;
     listen [::]:80;
-    server_name admin.example.com;
+    server_name eiceblog.eicetechnology.com;
 
     # Certbot will add the 443 server block + redirect automatically
-    # when you run: certbot --nginx -d admin.example.com
+    # when you run: certbot --nginx -d eiceblog.eicetechnology.com
 
     client_max_body_size 10m;
 
