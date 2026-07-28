@@ -1,5 +1,5 @@
-# nginx reverse proxy config for cms-admin.
-# Copy to /etc/nginx/sites-available/cms-admin,
+# nginx reverse proxy config for cms-admin (eiceblog.eicetechnology.com).
+# Copy to /etc/nginx/sites-available/eiceblog.eicetechnology.com,
 # then symlink into sites-enabled and reload nginx. See DEPLOYMENT.md.
 
 server {

@@ -80,8 +80,8 @@ The container restarts automatically on crash or VPS reboot
 The example config is already set up for `eiceblog.eicetechnology.com`:
 
 ```bash
-sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/cms-admin
-sudo ln -s /etc/nginx/sites-available/cms-admin /etc/nginx/sites-enabled/
+sudo cp deploy/eiceblog.eicetechnology.com.conf.example /etc/nginx/sites-available/eiceblog.eicetechnology.com
+sudo ln -s /etc/nginx/sites-available/eiceblog.eicetechnology.com /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
