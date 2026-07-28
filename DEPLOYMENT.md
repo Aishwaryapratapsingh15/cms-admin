@@ -29,12 +29,13 @@ nginx -v
 
 ## 2. Clone the repo
 
+Already done — the repo lives at `/var/www/eice_cms_web` on this VPS:
+
 ```bash
-sudo mkdir -p /srv/cms-admin
-sudo chown $USER:$USER /srv/cms-admin
-git clone <your-repo-url> /srv/cms-admin
-cd /srv/cms-admin
+cd /var/www/eice_cms_web
 ```
+
+(If setting this up fresh elsewhere: `git clone <your-repo-url> /var/www/eice_cms_web`.)
 
 ## 3. Create the production env file
 
@@ -42,7 +43,8 @@ This file is **not** committed to git (`.env*` is gitignored) — create it
 directly on the server:
 
 ```bash
-nano .env.production
+cd /var/www/eice_cms_web
+nano .env
 ```
 
 ```env
@@ -104,7 +106,7 @@ over HTTPS — this is expected and correct.
 ## 7. Deploying updates
 
 ```bash
-cd /srv/cms-admin
+cd /var/www/eice_cms_web
 git pull
 docker compose build
 docker compose up -d
@@ -151,8 +153,8 @@ docker system prune -f               # clean up old dangling images after a few 
   for the `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` and `deploymentId` settings
   needed to keep Server Actions and asset versioning consistent across
   instances.
-- **`.env.production` lives only on the server.** It's read at container
-  startup, not baked into the image at build time — the same image can be
-  reused for staging by swapping this file's contents.
+- **`.env` lives only on the server.** It's read at container startup, not
+  baked into the image at build time — the same image can be reused for
+  staging by swapping this file's contents.
 - **Local dev is unaffected.** `.env.local` keeps pointing at your local
   backend; none of this changes how `npm run dev` works.
