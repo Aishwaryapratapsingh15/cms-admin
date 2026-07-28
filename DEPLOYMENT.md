@@ -1,9 +1,10 @@
 # Deploying cms-admin to a Linux VPS
 
 This app is deployed as a Docker container behind nginx (nginx runs directly on
-the VPS, not in Docker). The container only listens on `127.0.0.1:3000` — nginx
-is the only thing exposed to the internet, terminating TLS and reverse-proxying
-to the app.
+the VPS, not in Docker). The container only listens on `127.0.0.1:3012` (host
+port — 3000 was already taken by another service on this VPS; the app still
+runs on 3000 *inside* the container) — nginx is the only thing exposed to the
+internet, terminating TLS and reverse-proxying to the app.
 
 ## 1. One-time server setup
 
@@ -68,7 +69,7 @@ Check it's healthy:
 ```bash
 docker compose ps
 docker compose logs -f cms-admin
-curl -I http://127.0.0.1:3000/login   # expect HTTP 200
+curl -I http://127.0.0.1:3012/login   # expect HTTP 200
 ```
 
 The container restarts automatically on crash or VPS reboot
