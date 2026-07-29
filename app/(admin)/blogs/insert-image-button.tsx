@@ -2,6 +2,7 @@
 
 import { useState, type RefObject } from "react";
 import { ImagePlus } from "lucide-react";
+import type { MDXEditorMethods } from "@mdxeditor/editor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,37 +17,18 @@ import type { Media } from "@/lib/types";
 
 export function InsertImageButton({
   media,
-  textareaRef,
-  content,
-  onChange,
+  editorRef,
 }: {
   media: Media[];
-  textareaRef: RefObject<HTMLTextAreaElement | null>;
-  content: string;
-  onChange: (next: string) => void;
+  editorRef: RefObject<MDXEditorMethods | null>;
 }) {
   const [open, setOpen] = useState(false);
 
   function insertImage(item: Media) {
     const markdown = `![${item.altText ?? item.originalName}](${item.url})`;
-    const textarea = textareaRef.current;
-    const start = textarea?.selectionStart ?? content.length;
-    const end = textarea?.selectionEnd ?? content.length;
-
-    const before = content.slice(0, start);
-    const after = content.slice(end);
-    const needsLeadingNewline = before.length > 0 && !before.endsWith("\n");
-    const insertion = `${needsLeadingNewline ? "\n" : ""}${markdown}\n`;
-    const next = before + insertion + after;
-
-    onChange(next);
+    editorRef.current?.insertMarkdown(markdown);
     setOpen(false);
-
-    requestAnimationFrame(() => {
-      const cursor = before.length + insertion.length;
-      textarea?.focus();
-      textarea?.setSelectionRange(cursor, cursor);
-    });
+    editorRef.current?.focus();
   }
 
   return (

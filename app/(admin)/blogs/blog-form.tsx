@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import type { MDXEditorMethods } from "@mdxeditor/editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,7 @@ import { createBlogAction, updateBlogAction, type ActionState } from "@/lib/acti
 import type { Blog, BlogStatus, Category, Media, Tag } from "@/lib/types";
 import { FeaturedImagePicker } from "./featured-image-picker";
 import { InsertImageButton } from "./insert-image-button";
+import { RichTextEditor } from "./rich-text-editor";
 
 const initialState: ActionState = {};
 
@@ -53,7 +55,7 @@ export function BlogForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [status, setStatus] = useState<BlogStatus>(blog?.status ?? "DRAFT");
   const [content, setContent] = useState(blog?.content ?? "");
-  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<MDXEditorMethods>(null);
   const statusOptions = canPublish
     ? STATUS_OPTIONS
     : STATUS_OPTIONS.filter((opt) => opt.value === "DRAFT");
@@ -100,23 +102,15 @@ export function BlogForm({
           </div>
           <div className="grid gap-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="content">Content (Markdown)</Label>
-              <InsertImageButton
-                media={media}
-                textareaRef={contentRef}
-                content={content}
-                onChange={setContent}
-              />
+              <Label htmlFor="content">Content</Label>
+              <InsertImageButton media={media} editorRef={editorRef} />
             </div>
-            <Textarea
-              id="content"
-              name="content"
-              ref={contentRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-              rows={16}
-              className="font-mono text-sm"
+            <input type="hidden" name="content" value={content} />
+            <RichTextEditor
+              ref={editorRef}
+              markdown={content}
+              onChange={setContent}
+              placeholder="Write your post..."
             />
           </div>
 
