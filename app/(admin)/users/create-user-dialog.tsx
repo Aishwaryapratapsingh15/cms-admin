@@ -80,7 +80,11 @@ export function CreateUserDialog({ roles }: { roles: Role[] }) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="new-role">Role</Label>
-            <Select name="roleId" defaultValue={roles[0]?.id}>
+            <Select
+              name="roleId"
+              defaultValue={roles[0]?.id}
+              items={Object.fromEntries(roles.map((role) => [role.id, role.name]))}
+            >
               <SelectTrigger id="new-role" className="w-full">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>

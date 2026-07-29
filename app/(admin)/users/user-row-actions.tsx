@@ -136,7 +136,11 @@ export function UserRowActions({
             </div>
             <div className="grid gap-2">
               <Label htmlFor={`role-${user.id}`}>Role</Label>
-              <Select name="roleId" defaultValue={user.roleId}>
+              <Select
+                name="roleId"
+                defaultValue={user.roleId}
+                items={Object.fromEntries(roles.map((role) => [role.id, role.name]))}
+              >
                 <SelectTrigger id={`role-${user.id}`} className="w-full">
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
