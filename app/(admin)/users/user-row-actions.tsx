@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -155,10 +156,9 @@ export function UserRowActions({
             </div>
             <div className="grid gap-2">
               <Label htmlFor={`password-${user.id}`}>New password</Label>
-              <Input
+              <PasswordInput
                 id={`password-${user.id}`}
                 name="password"
-                type="password"
                 placeholder="Leave blank to keep current password"
                 minLength={8}
                 autoComplete="new-password"

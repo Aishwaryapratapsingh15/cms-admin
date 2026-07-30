@@ -27,7 +27,6 @@ import {
 import { createBlogAction, updateBlogAction, type ActionState } from "@/lib/actions/blogs";
 import type { Blog, BlogStatus, Category, Media, Tag } from "@/lib/types";
 import { FeaturedImagePicker } from "./featured-image-picker";
-import { InsertImageButton } from "./insert-image-button";
 import { RichTextEditor } from "./rich-text-editor";
 import { useUnsavedChangesGuard } from "../unsaved-changes-context";
 
@@ -157,10 +156,7 @@ export function BlogForm({
             <FeaturedImagePicker media={media} initial={blog?.featuredMedia ?? null} />
           </div>
           <div className="grid gap-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="content">Content</Label>
-              <InsertImageButton media={media} editorRef={editorRef} />
-            </div>
+            <Label htmlFor="content">Content</Label>
             <input type="hidden" name="content" value={content} />
             <RichTextEditor
               ref={editorRef}
