@@ -7,8 +7,27 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
-function Dialog({ ...props }: DialogPrimitive.Root.Props) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+function Dialog({ onOpenChange, ...props }: DialogPrimitive.Root.Props) {
+  return (
+    <DialogPrimitive.Root
+      data-slot="dialog"
+      disablePointerDismissal
+      onOpenChange={(open, eventDetails) => {
+        // Only an explicit action (the X button, a Cancel button, or the
+        // trigger itself) should close a dialog — never an accidental
+        // outside click or Escape press losing unsaved form state.
+        if (
+          eventDetails.reason === "outside-press" ||
+          eventDetails.reason === "escape-key"
+        ) {
+          eventDetails.cancel()
+          return
+        }
+        onOpenChange?.(open, eventDetails)
+      }}
+      {...props}
+    />
+  )
 }
 
 function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
