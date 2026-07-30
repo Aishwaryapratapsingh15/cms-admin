@@ -117,7 +117,7 @@ export function UserRowActions({
             <DialogTitle>Edit user</DialogTitle>
             <DialogDescription>Update profile, role, and account status.</DialogDescription>
           </DialogHeader>
-          <form action={formAction} className="grid gap-4">
+          <form key={user.updatedAt} action={formAction} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor={`fullName-${user.id}`}>Full name</Label>
               <Input id={`fullName-${user.id}`} name="fullName" defaultValue={user.fullName} required />

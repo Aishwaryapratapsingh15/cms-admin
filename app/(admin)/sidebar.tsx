@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { navItemsForRole } from "@/lib/nav";
+import { useUnsavedChangesGuard } from "./unsaved-changes-context";
 
 export function Sidebar({ role }: { role: string }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { guardedNavigate } = useUnsavedChangesGuard();
   const items = navItemsForRole(role);
 
   return (
@@ -22,6 +25,10 @@ export function Sidebar({ role }: { role: string }) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => {
+                e.preventDefault();
+                guardedNavigate(item.href, router);
+              }}
               className={cn(
                 "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active

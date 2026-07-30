@@ -58,7 +58,7 @@ export function CategoryFormDialog({
               : "Slug is auto-generated from the name if left blank."}
           </DialogDescription>
         </DialogHeader>
-        <form action={formAction} className="grid gap-4">
+        <form key={category?.updatedAt} action={formAction} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input id="name" name="name" defaultValue={category?.name} required maxLength={150} />

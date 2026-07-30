@@ -16,11 +16,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { createBlogAction, updateBlogAction, type ActionState } from "@/lib/actions/blogs";
 import type { Blog, BlogStatus, Category, Media, Tag } from "@/lib/types";
 import { FeaturedImagePicker } from "./featured-image-picker";
 import { InsertImageButton } from "./insert-image-button";
 import { RichTextEditor } from "./rich-text-editor";
+import { useUnsavedChangesGuard } from "../unsaved-changes-context";
 
 const initialState: ActionState = {};
 
@@ -56,20 +65,67 @@ export function BlogForm({
   const [status, setStatus] = useState<BlogStatus>(blog?.status ?? "DRAFT");
   const [content, setContent] = useState(blog?.content ?? "");
   const editorRef = useRef<MDXEditorMethods>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const statusOptions = canPublish
     ? STATUS_OPTIONS
     : STATUS_OPTIONS.filter((opt) => opt.value === "DRAFT");
 
+  const [isDirty, setIsDirty] = useState(false);
+  const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
+  const [savingToLeave, setSavingToLeave] = useState(false);
+  const { setBlocker } = useUnsavedChangesGuard();
+
   useEffect(() => {
-    if (state.error) toast.error(state.error);
-    if (state.success) toast.success("Blog saved");
+    if (state.error) {
+      toast.error(state.error);
+      setSavingToLeave(false);
+    }
+    if (state.success) {
+      toast.success("Blog saved");
+      setIsDirty(false);
+      setPendingProceed((current) => {
+        if (current) {
+          setSavingToLeave(false);
+          current();
+        }
+        return null;
+      });
+    }
   }, [state]);
+
+  useEffect(() => {
+    setBlocker((proceed) => {
+      if (isDirty) {
+        setPendingProceed(() => proceed);
+      } else {
+        proceed();
+      }
+    });
+    return () => setBlocker(null);
+  }, [isDirty, setBlocker]);
+
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   const selectedCategoryIds = new Set(blog?.categories.map((c) => c.id));
   const selectedTagIds = new Set(blog?.tags.map((t) => t.id));
 
   return (
-    <form action={formAction} className="grid gap-6">
+    <>
+    <form
+      ref={formRef}
+      action={formAction}
+      className="grid gap-6"
+      onChange={() => setIsDirty(true)}
+      onInput={() => setIsDirty(true)}
+    >
       <Tabs defaultValue="content">
         <TabsList>
           <TabsTrigger value="content">Content</TabsTrigger>
@@ -249,6 +305,40 @@ export function BlogForm({
         </Button>
       </div>
     </form>
+
+    <Dialog open={pendingProceed !== null} onOpenChange={(open) => !open && setPendingProceed(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Unsaved changes</DialogTitle>
+          <DialogDescription>
+            You have unsaved changes to this blog post. Do you want to save before leaving?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            disabled={savingToLeave}
+            onClick={() => {
+              const proceed = pendingProceed;
+              setPendingProceed(null);
+              proceed?.();
+            }}
+          >
+            Leave without saving
+          </Button>
+          <Button
+            disabled={savingToLeave || isPending}
+            onClick={() => {
+              setSavingToLeave(true);
+              formRef.current?.requestSubmit();
+            }}
+          >
+            {savingToLeave || isPending ? "Saving..." : "Save and leave"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 

@@ -51,7 +51,7 @@ export function TagFormDialog({
               : "Slug is auto-generated from the name if left blank."}
           </DialogDescription>
         </DialogHeader>
-        <form action={formAction} className="grid gap-4">
+        <form key={tag?.updatedAt} action={formAction} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input id="name" name="name" defaultValue={tag?.name} required maxLength={100} />
