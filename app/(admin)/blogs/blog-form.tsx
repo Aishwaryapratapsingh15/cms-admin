@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
@@ -84,6 +85,21 @@ export function BlogForm({
   const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
   const [savingToLeave, setSavingToLeave] = useState(false);
   const { setBlocker } = useUnsavedChangesGuard();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // createBlogAction redirects on success (it can't return `success: true`
+    // the way updateBlogAction does — redirect() throws before that's
+    // possible), so this is the one-time "just created" toast for arriving
+    // here fresh off that redirect. Stripped from the URL immediately after
+    // so refreshing the page doesn't show it again.
+    if (searchParams.get("created")) {
+      toast.success("Blog saved");
+      router.replace(`/blogs/${blog?.id}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (state.error) {

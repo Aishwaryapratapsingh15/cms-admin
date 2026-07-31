@@ -84,7 +84,10 @@ export async function createBlogAction(
   }
 
   revalidatePath("/blogs");
-  redirect(`/blogs/${blog.id}`);
+  // redirect() throws internally, so the caller never sees `success: true`
+  // to toast on — carry a flag through the URL instead, shown once on arrival
+  // by BlogForm and then stripped.
+  redirect(`/blogs/${blog.id}?created=1`);
 }
 
 export async function updateBlogAction(
