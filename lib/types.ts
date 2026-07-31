@@ -99,6 +99,14 @@ export interface Blog {
   updatedAt: string;
   categories: Category[];
   tags: Tag[];
+  faqs: BlogFaq[];
+}
+
+export interface BlogFaq {
+  id: string;
+  question: string;
+  answer: string;
+  position: number;
 }
 
 export interface BlogVersion {

@@ -24,6 +24,28 @@ function buildPayload(formData: FormData) {
   // would make clearing a previously-set featured image silently do nothing.
   const featuredMediaId = getStr("featuredMediaId") ?? null;
 
+  // Same "omit vs empty array" distinction matters here: an empty array must
+  // still be sent (it means "the user removed every FAQ"), only a missing/
+  // unparseable hidden field should mean "leave FAQs untouched".
+  let faqs: { question: string; answer: string }[] | undefined;
+  const faqsRaw = formData.get("faqs");
+  if (typeof faqsRaw === "string") {
+    try {
+      const parsed = JSON.parse(faqsRaw);
+      if (Array.isArray(parsed)) {
+        faqs = parsed
+          .map((f) => ({
+            question: String(f?.question ?? "").trim(),
+            answer: String(f?.answer ?? "").trim(),
+          }))
+          .filter((f) => f.question && f.answer);
+      }
+    } catch {
+      // Malformed JSON shouldn't happen (we control the hidden input), but
+      // if it does, leave faqs undefined rather than wiping existing ones.
+    }
+  }
+
   return {
     title: String(formData.get("title") ?? ""),
     slug: getStr("slug"),
@@ -42,6 +64,7 @@ function buildPayload(formData: FormData) {
     featuredMediaId,
     categoryIds: formData.getAll("categoryIds").map(String),
     tagIds: formData.getAll("tagIds").map(String),
+    faqs,
   };
 }
 

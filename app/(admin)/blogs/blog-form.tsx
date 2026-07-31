@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Plus, Trash2 } from "lucide-react";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +64,16 @@ export function BlogForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [status, setStatus] = useState<BlogStatus>(blog?.status ?? "DRAFT");
   const [content, setContent] = useState(blog?.content ?? "");
+  // Controlled (rather than defaultValue) so a failed submit (e.g. slug
+  // conflict) doesn't wipe them — React resets uncontrolled form fields to
+  // their defaultValue whenever a useActionState action settles, even on
+  // error.
+  const [title, setTitle] = useState(blog?.title ?? "");
+  const [slug, setSlug] = useState(blog?.slug ?? "");
+  const [excerpt, setExcerpt] = useState(blog?.excerpt ?? "");
+  const [faqs, setFaqs] = useState(
+    blog?.faqs.map((faq) => ({ question: faq.question, answer: faq.answer })) ?? [],
+  );
   const editorRef = useRef<MDXEditorMethods>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const statusOptions = canPublish
@@ -130,26 +141,41 @@ export function BlogForm({
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
+          <TabsTrigger value="faqs">FAQs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" defaultValue={blog?.title} required maxLength={255} />
+            <Input
+              id="title"
+              name="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              maxLength={255}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="slug">Slug</Label>
             <Input
               id="slug"
               name="slug"
-              defaultValue={blog?.slug}
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
               placeholder="auto-generated if blank"
               maxLength={280}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="excerpt">Excerpt</Label>
-            <Textarea id="excerpt" name="excerpt" defaultValue={blog?.excerpt ?? ""} rows={2} />
+            <Textarea
+              id="excerpt"
+              name="excerpt"
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              rows={2}
+            />
           </div>
           <div className="grid gap-2">
             <Label>Featured image</Label>
@@ -293,9 +319,83 @@ export function BlogForm({
             <Input id="canonicalUrl" name="canonicalUrl" defaultValue={blog?.canonicalUrl ?? ""} />
           </div>
         </TabsContent>
+
+        <TabsContent value="faqs" className="grid gap-4">
+          <input type="hidden" name="faqs" value={JSON.stringify(faqs)} />
+          <p className="text-muted-foreground text-sm">
+            Optional. Shown as a &quot;Frequently Asked Questions&quot; section on the post and
+            included as FAQ schema for Google.
+          </p>
+
+          {faqs.map((faq, index) => (
+            <div key={index} className="grid gap-2 rounded-md border p-3">
+              <div className="flex items-center justify-between">
+                <Label>FAQ {index + 1}</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`Remove FAQ ${index + 1}`}
+                  onClick={() =>
+                    setFaqs((current) => current.filter((_, i) => i !== index))
+                  }
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+              <Input
+                placeholder="Question"
+                maxLength={300}
+                value={faq.question}
+                onChange={(e) =>
+                  setFaqs((current) =>
+                    current.map((f, i) =>
+                      i === index ? { ...f, question: e.target.value } : f,
+                    ),
+                  )
+                }
+              />
+              <Textarea
+                placeholder="Answer"
+                rows={2}
+                maxLength={1000}
+                value={faq.answer}
+                onChange={(e) =>
+                  setFaqs((current) =>
+                    current.map((f, i) => (i === index ? { ...f, answer: e.target.value } : f)),
+                  )
+                }
+              />
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setFaqs((current) => [...current, { question: "", answer: "" }])}
+          >
+            <Plus className="size-4" />
+            Add FAQ
+          </Button>
+        </TabsContent>
       </Tabs>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {!blog && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isPending}
+            onClick={() => {
+              if (!formRef.current?.reportValidity()) return;
+              const formData = new FormData(formRef.current);
+              formData.set("status", "DRAFT");
+              formAction(formData);
+            }}
+          >
+            {isPending ? "Saving..." : "Save as Draft"}
+          </Button>
+        )}
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : blog ? "Save changes" : "Create blog"}
         </Button>
