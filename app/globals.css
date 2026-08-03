@@ -128,3 +128,9 @@
     @apply font-sans;
   }
 }
+
+/* Tailwind's preflight resets `a { text-decoration: inherit }`, so links
+   typed into the blog rich text editor render with no underline. */
+.rich-text-editor a {
+  text-decoration: underline;
+}

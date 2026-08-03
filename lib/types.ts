@@ -84,6 +84,12 @@ export interface Blog {
   seoTitle: string | null;
   seoDescription: string | null;
   canonicalUrl: string | null;
+  ctaHeading: string | null;
+  ctaDescription: string | null;
+  ctaPrimaryText: string | null;
+  ctaPrimaryUrl: string | null;
+  ctaSecondaryText: string | null;
+  ctaSecondaryUrl: string | null;
   featuredMediaId: string | null;
   featuredMedia: {
     id: string;

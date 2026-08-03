@@ -157,6 +157,7 @@ export function BlogForm({
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
+          <TabsTrigger value="cta">CTA</TabsTrigger>
           <TabsTrigger value="faqs">FAQs</TabsTrigger>
         </TabsList>
 
@@ -333,6 +334,77 @@ export function BlogForm({
           <div className="grid gap-2">
             <Label htmlFor="canonicalUrl">Canonical URL</Label>
             <Input id="canonicalUrl" name="canonicalUrl" defaultValue={blog?.canonicalUrl ?? ""} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="cta" className="grid gap-4">
+          <p className="text-muted-foreground text-sm">
+            Shown as a card after the post content. Leave any field blank to use the
+            site&apos;s default copy for that field.
+          </p>
+          <div className="grid gap-2">
+            <Label htmlFor="ctaHeading">Heading</Label>
+            <Input
+              id="ctaHeading"
+              name="ctaHeading"
+              defaultValue={blog?.ctaHeading ?? ""}
+              maxLength={255}
+              placeholder="See how EICE Technology implements this for enterprise clients."
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="ctaDescription">Description</Label>
+            <Textarea
+              id="ctaDescription"
+              name="ctaDescription"
+              defaultValue={blog?.ctaDescription ?? ""}
+              rows={2}
+              placeholder="Our engineers have deployed this architecture across dozens of organizations. Schedule a working session to walk through your specific constraints."
+            />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="ctaPrimaryText">Primary button label</Label>
+              <Input
+                id="ctaPrimaryText"
+                name="ctaPrimaryText"
+                defaultValue={blog?.ctaPrimaryText ?? ""}
+                maxLength={60}
+                placeholder="Request a Demo"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="ctaPrimaryUrl">Primary button link</Label>
+              <Input
+                id="ctaPrimaryUrl"
+                name="ctaPrimaryUrl"
+                defaultValue={blog?.ctaPrimaryUrl ?? ""}
+                maxLength={500}
+                placeholder="/products/eicerise/form?product=Blog"
+              />
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="ctaSecondaryText">Secondary button label</Label>
+              <Input
+                id="ctaSecondaryText"
+                name="ctaSecondaryText"
+                defaultValue={blog?.ctaSecondaryText ?? ""}
+                maxLength={60}
+                placeholder="Talk to Sales"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="ctaSecondaryUrl">Secondary button link</Label>
+              <Input
+                id="ctaSecondaryUrl"
+                name="ctaSecondaryUrl"
+                defaultValue={blog?.ctaSecondaryUrl ?? ""}
+                maxLength={500}
+                placeholder="/contact"
+              />
+            </div>
           </div>
         </TabsContent>
 

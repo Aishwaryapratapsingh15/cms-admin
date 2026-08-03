@@ -52,7 +52,22 @@ export async function proxy(req: NextRequest) {
     const refreshed = await refreshTokens(refreshToken);
     if (refreshed) {
       accessToken = refreshed.accessToken;
-      response = NextResponse.next();
+
+      // Rewrite the incoming Cookie header too, not just the outgoing
+      // response. Otherwise only *future* requests see the refreshed token —
+      // this exact request (e.g. a Server Action that's about to run) would
+      // still read the old, now-expired access token via cookies() and get
+      // rejected by the backend, even though we just refreshed it.
+      const cookieMap = new Map(req.cookies.getAll().map((c) => [c.name, c.value]));
+      cookieMap.set(ACCESS_TOKEN_COOKIE, refreshed.accessToken);
+      cookieMap.set(REFRESH_TOKEN_COOKIE, refreshed.refreshToken);
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set(
+        "cookie",
+        Array.from(cookieMap, ([name, value]) => `${name}=${value}`).join("; "),
+      );
+
+      response = NextResponse.next({ request: { headers: requestHeaders } });
       response.cookies.set(ACCESS_TOKEN_COOKIE, refreshed.accessToken, {
         ...cookieOptions,
         maxAge: accessTokenMaxAge(refreshed.accessToken),

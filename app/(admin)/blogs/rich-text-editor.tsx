@@ -26,8 +26,30 @@ import {
   InsertThematicBreak,
   CodeToggle,
   Separator,
+  usePublisher,
+  insertMarkdown$,
+  ButtonWithTooltip,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
+
+// Pressing Enter repeatedly to add blank-line spacing doesn't survive
+// save/reload: markdown collapses any run of blank lines to one on
+// parse+serialize, since blank lines are pure block separators, not content.
+// A paragraph containing only a non-breaking-space entity (&#x20;) is real
+// content, so it round-trips through save/reload intact.
+function InsertSpacer() {
+  const insertMarkdown = usePublisher(insertMarkdown$);
+  return (
+    <ButtonWithTooltip
+      title="Insert spacer (a blank line that survives saving)"
+      onClick={() => insertMarkdown("&#x20;")}
+    >
+      <span aria-hidden style={{ fontSize: 14, lineHeight: 1 }}>
+        ␣
+      </span>
+    </ButtonWithTooltip>
+  );
+}
 
 export const RichTextEditor = forwardRef<
   MDXEditorMethods,
@@ -83,6 +105,8 @@ export const RichTextEditor = forwardRef<
                 <CreateLink />
                 <InsertTable />
                 <InsertThematicBreak />
+                <Separator />
+                <InsertSpacer />
               </>
             ),
           }),
