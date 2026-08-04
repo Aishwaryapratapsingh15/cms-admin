@@ -51,6 +51,7 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  heading: string | null;
   description: string | null;
   color: string | null;
   createdAt: string;

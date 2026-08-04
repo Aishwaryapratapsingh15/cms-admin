@@ -12,12 +12,14 @@ export interface ActionState {
 function buildPayload(formData: FormData) {
   const name = String(formData.get("name") ?? "");
   const slug = String(formData.get("slug") ?? "").trim();
+  const heading = String(formData.get("heading") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const color = String(formData.get("color") ?? "").trim();
 
   return {
     name,
     slug: slug || undefined,
+    heading: heading || undefined,
     description: description || undefined,
     color: color || undefined,
   };

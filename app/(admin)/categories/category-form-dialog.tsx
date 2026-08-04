@@ -74,6 +74,20 @@ export function CategoryFormDialog({
             />
           </div>
           <div className="grid gap-2">
+            <Label htmlFor="heading">Page heading</Label>
+            <Input
+              id="heading"
+              name="heading"
+              defaultValue={category?.heading ?? ""}
+              maxLength={255}
+              placeholder="Explore our Web Development insights"
+            />
+            <p className="text-muted-foreground text-xs">
+              Shown on the public category page, below the category name. Falls back to
+              default site copy if left blank.
+            </p>
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea id="description" name="description" defaultValue={category?.description ?? ""} />
           </div>
