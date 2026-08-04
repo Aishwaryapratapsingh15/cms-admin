@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,10 +39,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateUserAction, deleteUserAction, type ActionState } from "@/lib/actions/users";
+import {
+  updateUserAction,
+  deleteUserAction,
+  setUserAvatarAction,
+  type ActionState,
+} from "@/lib/actions/users";
 import type { Role, User } from "@/lib/types";
 
 const initialState: ActionState = {};
+
+function AvatarPicker({ userId, avatarMedia }: { userId: string; avatarMedia: User["avatarMedia"] }) {
+  const boundSetAvatar = setUserAvatarAction.bind(null, userId);
+  const [state, formAction, isPending] = useActionState(boundSetAvatar, initialState);
+  const [preview, setPreview] = useState<string | null>(avatarMedia?.url ?? null);
+
+  useEffect(() => {
+    if (state.success) toast.success("Avatar updated");
+    else if (state.error) toast.error(state.error);
+  }, [state]);
+
+  return (
+    <form action={formAction} className="flex items-center gap-3">
+      <div className="bg-muted flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border">
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={preview} alt="" className="size-full object-cover" />
+        ) : (
+          <UserRound className="text-muted-foreground size-6" />
+        )}
+      </div>
+      <div className="grid gap-1.5">
+        <Input
+          type="file"
+          name="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="text-xs"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) setPreview(URL.createObjectURL(file));
+          }}
+        />
+        <Button type="submit" size="sm" variant="outline" disabled={isPending}>
+          {isPending ? "Uploading..." : "Upload photo"}
+        </Button>
+      </div>
+    </form>
+  );
+}
 
 export function UserRowActions({
   user,
@@ -118,6 +162,7 @@ export function UserRowActions({
             <DialogTitle>Edit user</DialogTitle>
             <DialogDescription>Update profile, role, and account status.</DialogDescription>
           </DialogHeader>
+          <AvatarPicker userId={user.id} avatarMedia={user.avatarMedia} />
           <form key={user.updatedAt} action={formAction} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor={`fullName-${user.id}`}>Full name</Label>

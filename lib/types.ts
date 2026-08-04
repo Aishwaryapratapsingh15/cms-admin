@@ -30,6 +30,14 @@ export interface User {
   linkedin: string | null;
   twitter: string | null;
   avatarMediaId: string | null;
+  avatarMedia: {
+    id: string;
+    s3Key: string;
+    altText: string | null;
+    width: number | null;
+    height: number | null;
+    url: string;
+  } | null;
   isActive: boolean;
   lastLogin: string | null;
   createdAt: string;

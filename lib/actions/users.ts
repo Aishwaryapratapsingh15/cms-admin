@@ -9,6 +9,30 @@ export interface ActionState {
   success?: boolean;
 }
 
+export async function setUserAvatarAction(
+  userId: string,
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Please choose a photo to upload." };
+  }
+
+  try {
+    await apiFetch<User>(`/users/${userId}/avatar`, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (err) {
+    if (err instanceof ApiError) return { error: err.detail };
+    throw err;
+  }
+
+  revalidatePath("/users");
+  return { success: true };
+}
+
 export async function updateUserAction(
   userId: string,
   _prevState: ActionState,
