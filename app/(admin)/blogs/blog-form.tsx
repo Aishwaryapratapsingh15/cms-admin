@@ -288,8 +288,8 @@ export function BlogForm({
         </TabsContent>
 
         <TabsContent value="settings" className="grid gap-4">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="grid gap-2">
+          <div className="grid items-start gap-4 sm:grid-cols-2">
+            <div className="grid content-start gap-2">
               <Label htmlFor="status">Status</Label>
               <Select
                 name="status"
@@ -315,7 +315,7 @@ export function BlogForm({
               )}
             </div>
             {status === "SCHEDULED" && (
-              <div className="grid gap-2">
+              <div className="grid content-start gap-2">
                 <Label htmlFor="scheduledAt">Scheduled for</Label>
                 <Input
                   id="scheduledAt"
