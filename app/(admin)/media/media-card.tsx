@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { toast } from "sonner";
 import { FileText, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,16 +32,21 @@ export function MediaCard({ media, canManage }: { media: Media; canManage: boole
   const isImage = media.mimeType.startsWith("image/");
   const [editOpen, setEditOpen] = useState(false);
   const boundUpdate = updateMediaAction.bind(null, media.id);
-  const [state, formAction, isPending] = useActionState(boundUpdate, initialState);
-
-  useEffect(() => {
-    if (state.success) {
-      setEditOpen(false);
-      toast.success("Media updated");
-    } else if (state.error) {
-      toast.error(state.error);
-    }
-  }, [state]);
+  // Close + toast run with the action's result here, not in an effect that
+  // watches the returned state.
+  const [, formAction, isPending] = useActionState(
+    async (prev: ActionState, formData: FormData) => {
+      const result = await boundUpdate(prev, formData);
+      if (result.success) {
+        setEditOpen(false);
+        toast.success("Media updated");
+      } else if (result.error) {
+        toast.error(result.error);
+      }
+      return result;
+    },
+    initialState,
+  );
 
   return (
     <Card className="overflow-hidden py-0">

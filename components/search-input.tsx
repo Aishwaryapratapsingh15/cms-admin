@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useRef } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -9,13 +9,19 @@ export function SearchInput({ placeholder = "Search..." }: { placeholder?: strin
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("search") ?? "");
+  const urlSearch = searchParams.get("search") ?? "";
+  const [value, setValue] = useState(urlSearch);
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch);
   const [, startTransition] = useTransition();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => {
-    setValue(searchParams.get("search") ?? "");
-  }, [searchParams]);
+  // Re-sync the box when the URL's search param changes externally (back/
+  // forward, "clear filters"). Done during render, not in an effect, so there
+  // is no extra render with a stale value.
+  if (urlSearch !== prevUrlSearch) {
+    setPrevUrlSearch(urlSearch);
+    setValue(urlSearch);
+  }
 
   function handleChange(next: string) {
     setValue(next);

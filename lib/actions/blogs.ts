@@ -18,7 +18,9 @@ function buildPayload(formData: FormData) {
   };
 
   const status = getStr("status");
-  const scheduledAtLocal = getStr("scheduledAt");
+  // Already a UTC ISO string: the browser converts the picked local time (see
+  // BlogForm). Converting here would use the server's timezone, not the editor's.
+  const scheduledAt = getStr("scheduledAtIso");
   // Always sent explicitly (string id or null), never omitted: omitting the
   // key means "leave untouched" on PATCH (Prisma no-ops on `undefined`), which
   // would make clearing a previously-set featured image silently do nothing.
@@ -52,10 +54,7 @@ function buildPayload(formData: FormData) {
     excerpt: getStr("excerpt"),
     content: String(formData.get("content") ?? ""),
     status,
-    scheduledAt:
-      status === "SCHEDULED" && scheduledAtLocal
-        ? new Date(scheduledAtLocal).toISOString()
-        : undefined,
+    scheduledAt: status === "SCHEDULED" ? scheduledAt : undefined,
     seoTitle: getStr("seoTitle"),
     seoDescription: getStr("seoDescription"),
     canonicalUrl: getStr("canonicalUrl"),

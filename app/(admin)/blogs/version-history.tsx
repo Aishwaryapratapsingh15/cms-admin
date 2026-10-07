@@ -46,13 +46,13 @@ export function VersionHistory({ blogId, versions }: { blogId: string; versions:
           <DialogTitle>Version history</DialogTitle>
           <DialogDescription>
             Snapshots are taken automatically whenever title, excerpt, or content changes. Rolling
-            back creates a new version — it's not destructive.
+            back creates a new version — it&apos;s not destructive.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           {versions.length === 0 && (
             <p className="text-muted-foreground text-sm">
-              No edit history yet — this blog hasn't had a content change since creation.
+              No edit history yet — this blog hasn&apos;t had a content change since creation.
             </p>
           )}
           {versions.map((version) => (

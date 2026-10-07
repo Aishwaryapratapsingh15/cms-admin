@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Upload, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,20 +23,25 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "a
 
 export function UploadDialog() {
   const [open, setOpen] = useState(false);
-  const [state, formAction, isPending] = useActionState(uploadMediaAction, initialState);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (state.success) {
-      setOpen(false);
-      setSelectedFileName(null);
-      toast.success("Media uploaded");
-    } else if (state.error) {
-      toast.error(state.error);
-    }
-  }, [state]);
+  // Close + toast run with the action's result here, not in an effect that
+  // watches the returned state.
+  const [, formAction, isPending] = useActionState(
+    async (prev: ActionState, formData: FormData) => {
+      const result = await uploadMediaAction(prev, formData);
+      if (result.success) {
+        setOpen(false);
+        setSelectedFileName(null);
+        toast.success("Media uploaded");
+      } else if (result.error) {
+        toast.error(result.error);
+      }
+      return result;
+    },
+    initialState,
+  );
 
   function handleDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();

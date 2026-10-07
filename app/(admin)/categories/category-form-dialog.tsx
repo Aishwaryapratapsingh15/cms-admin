@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,16 +35,21 @@ export function CategoryFormDialog({
   const action = category
     ? updateCategoryAction.bind(null, category.id)
     : createCategoryAction;
-  const [state, formAction, isPending] = useActionState(action, initialState);
-
-  useEffect(() => {
-    if (state.success) {
-      setOpen(false);
-      toast.success(category ? "Category updated" : "Category created");
-    } else if (state.error) {
-      toast.error(state.error);
-    }
-  }, [state]);
+  // Close + toast run with the action's result here, not in an effect that
+  // watches the returned state.
+  const [, formAction, isPending] = useActionState(
+    async (prev: ActionState, formData: FormData) => {
+      const result = await action(prev, formData);
+      if (result.success) {
+        setOpen(false);
+        toast.success(category ? "Category updated" : "Category created");
+      } else if (result.error) {
+        toast.error(result.error);
+      }
+      return result;
+    },
+    initialState,
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

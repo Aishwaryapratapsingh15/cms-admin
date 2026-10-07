@@ -30,6 +30,7 @@ import { createBlogAction, updateBlogAction, type ActionState } from "@/lib/acti
 import type { Blog, BlogStatus, Category, Media, Tag } from "@/lib/types";
 import { FeaturedImagePicker } from "./featured-image-picker";
 import { RichTextEditor } from "./rich-text-editor";
+import { useIsClient } from "@/lib/use-is-client";
 import { useUnsavedChangesGuard } from "../unsaved-changes-context";
 
 const initialState: ActionState = {};
@@ -46,6 +47,15 @@ function toDatetimeLocal(value: string | null): string {
   const date = new Date(value);
   const offsetMs = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
+// Converted in the browser so the editor's own timezone is used. Doing this
+// in the server action would interpret the picked time in the *server's*
+// timezone (UTC in Docker), publishing at the wrong hour.
+function localToIso(value: string): string {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
 }
 
 export function BlogForm({
@@ -65,6 +75,15 @@ export function BlogForm({
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [status, setStatus] = useState<BlogStatus>(blog?.status ?? "DRAFT");
   const [content, setContent] = useState(blog?.content ?? "");
+  // toDatetimeLocal depends on the browser's timezone, which the server render
+  // can't know, so the saved value is only shown once on the client. `null`
+  // means "not edited yet"; kept in state (not defaultValue) so a failed
+  // submit doesn't reset it.
+  const isClient = useIsClient();
+  const [scheduledAtEdit, setScheduledAtEdit] = useState<string | null>(null);
+  const scheduledAtLocal =
+    scheduledAtEdit ?? (isClient ? toDatetimeLocal(blog?.scheduledAt ?? null) : "");
+  const timeZone = isClient ? Intl.DateTimeFormat().resolvedOptions().timeZone : "";
   // Controlled (rather than defaultValue) so a failed submit (e.g. slug
   // conflict) doesn't wipe them — React resets uncontrolled form fields to
   // their defaultValue whenever a useActionState action settles, even on
@@ -101,6 +120,9 @@ export function BlogForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Reacts to the server action's result (an external event), so the state
+  // resets below are a legitimate effect, not derivable during render.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (state.error) {
       toast.error(state.error);
@@ -118,6 +140,7 @@ export function BlogForm({
       });
     }
   }, [state]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     setBlocker((proceed) => {
@@ -149,6 +172,14 @@ export function BlogForm({
       ref={formRef}
       action={formAction}
       className="grid gap-6"
+      onSubmit={(e) => {
+        if (status !== "SCHEDULED") return;
+        const iso = localToIso(scheduledAtLocal);
+        if (!iso || new Date(iso).getTime() <= Date.now()) {
+          e.preventDefault();
+          toast.error("Pick a scheduled time in the future.");
+        }
+      }}
       onChange={() => setIsDirty(true)}
       onInput={() => setIsDirty(true)}
     >
@@ -288,11 +319,20 @@ export function BlogForm({
                 <Label htmlFor="scheduledAt">Scheduled for</Label>
                 <Input
                   id="scheduledAt"
-                  name="scheduledAt"
                   type="datetime-local"
-                  defaultValue={toDatetimeLocal(blog?.scheduledAt ?? null)}
+                  value={scheduledAtLocal}
+                  onChange={(e) => setScheduledAtEdit(e.target.value)}
                   required
                 />
+                <input
+                  type="hidden"
+                  name="scheduledAtIso"
+                  value={localToIso(scheduledAtLocal)}
+                />
+                <p className="text-muted-foreground text-xs">
+                  Goes live automatically within about a minute of this time
+                  {timeZone ? ` (${timeZone})` : ""}.
+                </p>
               </div>
             )}
           </div>

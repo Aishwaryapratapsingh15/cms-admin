@@ -105,17 +105,22 @@ export function UserRowActions({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isActive, setIsActive] = useState(user.isActive);
   const boundUpdate = updateUserAction.bind(null, user.id);
-  const [state, formAction, isPending] = useActionState(boundUpdate, initialState);
+  // Close + toast run with the action's result here, not in an effect that
+  // watches the returned state.
+  const [, formAction, isPending] = useActionState(
+    async (prev: ActionState, formData: FormData) => {
+      const result = await boundUpdate(prev, formData);
+      if (result.success) {
+        setEditOpen(false);
+        toast.success("User updated successfully");
+      } else if (result.error) {
+        toast.error(result.error);
+      }
+      return result;
+    },
+    initialState,
+  );
   const [isDeleting, startDeleteTransition] = useTransition();
-
-  useEffect(() => {
-    if (state.success) {
-      setEditOpen(false);
-      toast.success("User updated successfully");
-    } else if (state.error) {
-      toast.error(state.error);
-    }
-  }, [state]);
 
   function handleDelete() {
     startDeleteTransition(async () => {

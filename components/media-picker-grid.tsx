@@ -18,28 +18,31 @@ export function MediaPickerGrid({
   onSelect: (item: Media) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Media[] | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
+  const [searched, setSearched] = useState<{ query: string; items: Media[] } | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  useEffect(() => {
-    const trimmed = query.trim();
-    if (!trimmed) {
-      setResults(null);
-      setIsSearching(false);
-      return;
-    }
+  // Derived from `query` rather than synced via effects: an empty query shows
+  // the default list, and "searching" just means the latest results are for a
+  // different query than the one typed.
+  const trimmedQuery = query.trim();
+  const results = trimmedQuery ? (searched?.items ?? null) : null;
+  const isSearching = trimmedQuery !== "" && searched?.query !== trimmedQuery;
 
-    setIsSearching(true);
+  useEffect(() => {
+    if (!trimmedQuery) return;
+
+    let cancelled = false;
     const timeout = setTimeout(async () => {
-      const found = await searchMediaAction(trimmed);
-      setResults(found);
-      setIsSearching(false);
+      const found = await searchMediaAction(trimmedQuery);
+      if (!cancelled) setSearched({ query: trimmedQuery, items: found });
     }, 300);
 
-    return () => clearTimeout(timeout);
-  }, [query]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [trimmedQuery]);
 
   async function uploadAndSelect(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {

@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { LocalDateTime } from "@/components/local-date-time";
 import { StatusFilter } from "./status-filter";
 import { BlogRowActions } from "./blog-row-actions";
 
@@ -126,7 +127,15 @@ export default async function BlogsPage({ searchParams }: PageProps) {
                 <TableCell className="text-muted-foreground">{blog.author.fullName}</TableCell>
                 <TableCell>{blog.views.toLocaleString()}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">
-                  {blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : "—"}
+                  {blog.status === "SCHEDULED" && blog.scheduledAt ? (
+                    <>
+                      Scheduled · <LocalDateTime value={blog.scheduledAt} />
+                    </>
+                  ) : blog.publishedAt ? (
+                    new Date(blog.publishedAt).toLocaleDateString()
+                  ) : (
+                    "—"
+                  )}
                 </TableCell>
                 <TableCell>
                   <BlogRowActions
