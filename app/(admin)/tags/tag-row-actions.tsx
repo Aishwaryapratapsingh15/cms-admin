@@ -3,7 +3,8 @@
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmButton } from "@/components/delete-confirm-button";
-import { deleteTagAction } from "@/lib/actions/tags";
+import { MergeDialog } from "@/components/merge-dialog";
+import { deleteTagAction, mergeTagAction, searchTagsAction } from "@/lib/actions/tags";
 import type { Tag } from "@/lib/types";
 import { TagFormDialog } from "./tag-form-dialog";
 
@@ -17,6 +18,12 @@ export function TagRowActions({ tag }: { tag: Tag }) {
             <Pencil className="size-4" />
           </Button>
         }
+      />
+      <MergeDialog
+        noun="tag"
+        source={tag}
+        search={searchTagsAction}
+        onMerge={(targetId) => mergeTagAction(tag.id, targetId)}
       />
       <DeleteConfirmButton
         title={`Delete ${tag.name}?`}

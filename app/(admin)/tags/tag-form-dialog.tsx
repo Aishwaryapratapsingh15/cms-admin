@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createTagAction, updateTagAction, type ActionState } from "@/lib/actions/tags";
+import {
+  createTagAction,
+  searchTagsAction,
+  updateTagAction,
+  type ActionState,
+} from "@/lib/actions/tags";
+import { SimilarNameHint, useSimilarNames } from "@/components/similar-name-hint";
 import type { Tag } from "@/lib/types";
 
 const initialState: ActionState = {};
@@ -27,6 +33,10 @@ export function TagFormDialog({
   trigger: React.ReactElement;
 }) {
   const [open, setOpen] = useState(false);
+  // Controlled so a failed submit doesn't reset it, and so the duplicate hint
+  // can follow what's being typed.
+  const [name, setName] = useState(tag?.name ?? "");
+  const { exact, similar } = useSimilarNames(name, tag?.id, searchTagsAction, open);
   const action = tag ? updateTagAction.bind(null, tag.id) : createTagAction;
   // Close + toast run with the action's result here, not in an effect that
   // watches the returned state.
@@ -35,6 +45,7 @@ export function TagFormDialog({
       const result = await action(prev, formData);
       if (result.success) {
         setOpen(false);
+        if (!tag) setName("");
         toast.success(tag ? "Tag updated" : "Tag created");
       } else if (result.error) {
         toast.error(result.error);
@@ -59,7 +70,15 @@ export function TagFormDialog({
         <form key={tag?.updatedAt} action={formAction} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" defaultValue={tag?.name} required maxLength={100} />
+            <Input
+              id="name"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              maxLength={100}
+            />
+            <SimilarNameHint noun="tag" exact={exact} similar={similar} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="slug">Slug</Label>
@@ -72,7 +91,7 @@ export function TagFormDialog({
             />
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || Boolean(exact)}>
               {isPending ? "Saving..." : tag ? "Save changes" : "Create tag"}
             </Button>
           </DialogFooter>

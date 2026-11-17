@@ -3,7 +3,12 @@
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmButton } from "@/components/delete-confirm-button";
-import { deleteCategoryAction } from "@/lib/actions/categories";
+import { MergeDialog } from "@/components/merge-dialog";
+import {
+  deleteCategoryAction,
+  mergeCategoryAction,
+  searchCategoriesAction,
+} from "@/lib/actions/categories";
 import type { Category } from "@/lib/types";
 import { CategoryFormDialog } from "./category-form-dialog";
 
@@ -17,6 +22,12 @@ export function CategoryRowActions({ category }: { category: Category }) {
             <Pencil className="size-4" />
           </Button>
         }
+      />
+      <MergeDialog
+        noun="category"
+        source={category}
+        search={searchCategoriesAction}
+        onMerge={(targetId) => mergeCategoryAction(category.id, targetId)}
       />
       <DeleteConfirmButton
         title={`Delete ${category.name}?`}

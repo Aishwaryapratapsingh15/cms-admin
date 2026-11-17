@@ -78,7 +78,7 @@ export default async function TagsPage({ searchParams }: PageProps) {
               <TableHead>
                 <SortableHeader field="createdAt" label="Created" />
               </TableHead>
-              <TableHead className="w-20" />
+              <TableHead className="w-32" />
             </TableRow>
           </TableHeader>
           <TableBody>

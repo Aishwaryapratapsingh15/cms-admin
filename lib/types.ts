@@ -74,6 +74,13 @@ export interface Tag {
   updatedAt: string;
 }
 
+// Lightweight category/tag shape used by the duplicate-name hint and merge picker.
+export interface NameOption {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export type BlogStatus = "DRAFT" | "PUBLISHED" | "SCHEDULED" | "ARCHIVED";
 
 export interface Blog {

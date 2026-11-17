@@ -17,9 +17,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createCategoryAction,
+  searchCategoriesAction,
   updateCategoryAction,
   type ActionState,
 } from "@/lib/actions/categories";
+import { SimilarNameHint, useSimilarNames } from "@/components/similar-name-hint";
 import type { Category } from "@/lib/types";
 
 const initialState: ActionState = {};
@@ -32,6 +34,10 @@ export function CategoryFormDialog({
   trigger: React.ReactElement;
 }) {
   const [open, setOpen] = useState(false);
+  // Controlled so a failed submit doesn't reset it, and so the duplicate hint
+  // can follow what's being typed.
+  const [name, setName] = useState(category?.name ?? "");
+  const { exact, similar } = useSimilarNames(name, category?.id, searchCategoriesAction, open);
   const action = category
     ? updateCategoryAction.bind(null, category.id)
     : createCategoryAction;
@@ -42,6 +48,7 @@ export function CategoryFormDialog({
       const result = await action(prev, formData);
       if (result.success) {
         setOpen(false);
+        if (!category) setName("");
         toast.success(category ? "Category updated" : "Category created");
       } else if (result.error) {
         toast.error(result.error);
@@ -66,7 +73,15 @@ export function CategoryFormDialog({
         <form key={category?.updatedAt} action={formAction} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" defaultValue={category?.name} required maxLength={150} />
+            <Input
+              id="name"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              maxLength={150}
+            />
+            <SimilarNameHint noun="category" exact={exact} similar={similar} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="slug">Slug</Label>
@@ -110,7 +125,7 @@ export function CategoryFormDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || Boolean(exact)}>
               {isPending ? "Saving..." : category ? "Save changes" : "Create category"}
             </Button>
           </DialogFooter>

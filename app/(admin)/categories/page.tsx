@@ -79,7 +79,7 @@ export default async function CategoriesPage({ searchParams }: PageProps) {
               <TableHead>
                 <SortableHeader field="createdAt" label="Created" />
               </TableHead>
-              <TableHead className="w-20" />
+              <TableHead className="w-32" />
             </TableRow>
           </TableHeader>
           <TableBody>
